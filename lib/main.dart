@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_my_chat/chat.dart';
+import 'package:flutter_my_chat/login.dart';
+import 'package:flutter_my_chat/registration.dart';
 
 void main() => runApp(MyApp());
 
@@ -9,12 +12,21 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData.dark(),
-      home: MyHomePage(),
+      initialRoute: MyHomePage.id,
+      routes: {
+        MyHomePage.id : (context) => MyHomePage(),
+        Registration.id : (context) => Registration(),
+        Login.id : (context) => Login(),
+        Chat.id : (context) => Chat()
+      },
     );
   }
 }
 
 class MyHomePage extends StatelessWidget {
+
+  static const String id = "HOMESCREEN";
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -44,14 +56,18 @@ class MyHomePage extends StatelessWidget {
           ),
           CustomButton(
             text: 'Log In',
-            callback: () {},
+            callback: () {
+              Navigator.of(context).pushNamed(Login.id);
+            },
           ),
           SizedBox(
             height: 10,
           ),
           CustomButton(
             text: 'Register',
-            callback: () {},
+            callback: () {
+              Navigator.of(context).pushNamed(Registration.id);
+            },
           ),
         ],
       )

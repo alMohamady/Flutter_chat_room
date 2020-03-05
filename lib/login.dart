@@ -1,26 +1,25 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_my_chat/chat.dart';
-import 'package:flutter_my_chat/main.dart';
+import 'chat.dart';
+import 'main.dart';
 
+class Login extends StatefulWidget {
 
-class Registration extends StatefulWidget {
-
-  static const String id = "REGISRATION";
+  static const String id = "LOGIN";
 
   @override
-  _RegistrationState createState() => _RegistrationState();
+  _LoginState createState() => _LoginState();
 }
 
-class _RegistrationState extends State<Registration> {
+class _LoginState extends State<Login> {
 
   String email;
   String password;
 
   final FirebaseAuth _aut = FirebaseAuth.instance;
 
-  Future<void> registerUser() async {
-    FirebaseUser user = (await _aut.createUserWithEmailAndPassword(
+  Future<void> loginUser() async {
+    FirebaseUser user = (await _aut.signInWithEmailAndPassword(
       email: email,
       password: password,
     )).user;
@@ -33,9 +32,10 @@ class _RegistrationState extends State<Registration> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return  Scaffold(
       appBar: AppBar(
         title: Text("My Chat"),
       ),
@@ -77,9 +77,9 @@ class _RegistrationState extends State<Registration> {
             height: 50,
           ),
           CustomButton(
-            text: "Registration",
+            text: "Log in",
             callback: () async {
-              await registerUser();
+              await loginUser();
             },
           )
         ],
@@ -87,4 +87,3 @@ class _RegistrationState extends State<Registration> {
     );
   }
 }
-
