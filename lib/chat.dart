@@ -22,6 +22,21 @@ class _ChatState extends State<Chat> {
   TextEditingController messageController = TextEditingController(); 
   ScrollController scrollController = ScrollController();
 
+  Future<void> callBack() async {
+   if (messageController.text.length > 0){
+     await _firestore.collection("messages").add({
+       'text': messageController.text, 
+       'from': widget.user.email,
+       'date': DateTime.now().toIso8601String().toString()
+     });
+     messageController.clear();
+     scrollController.animateTo(
+         scrollController.position.maxScrollExtent,
+         duration: const Duration(milliseconds: 3000),
+         curve: Curves.easeOut);
+   }
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +45,7 @@ class _ChatState extends State<Chat> {
           tag: 'logo',
           child: Container(
             height: 40,
-            child: Image.asset("assets/images/logo.png"),
+            child: Image.asset("assets/images/chat.png"),
           ),
         ),
         title: Text("My Chat Room"),
@@ -50,14 +65,28 @@ class _ChatState extends State<Chat> {
           children: <Widget>[
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: _firestore.collection("messages").snapshots(),
+                stream: _firestore.collection("messages").orderBy('date').snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
                     return Center(
                       child: CircularProgressIndicator(),
                     );
                   }
-                  return ListView();
+
+                  List<DocumentSnapshot> docs = snapshot.data.documents;
+                  
+                  List<Widget> messages = docs.map((doc) => Message(
+                    from: doc.data["from"],
+                    text: doc.data["text"],
+                    me: widget.user.email == doc.data["from"]
+                  )).toList();
+
+                  return ListView(
+                    controller: scrollController,
+                    children: <Widget>[
+                      ...messages,
+                    ],
+                  );
                 },
               ),
             ),
@@ -69,14 +98,14 @@ class _ChatState extends State<Chat> {
                       controller: messageController,
                       decoration: InputDecoration(
                         hintText: "Enter your message ......",
+                        border: const OutlineInputBorder()
                       ),
+                      onSubmitted: (value) => callBack(),
                     ),
                   ),
                   SendButton(
                     text: 'Send',
-                    callback: () {
-
-                    },
+                    callback: callBack,
                   )
                 ],
               ),
@@ -106,3 +135,37 @@ class SendButton extends StatelessWidget {
     );
   }
 }
+
+class Message extends StatelessWidget {
+
+  final String from;
+  final String text;
+  final bool me;
+
+  const Message({Key key, this.from, this.text, this.me}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        crossAxisAlignment: me? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(from),
+          Material(
+            color: me ? Colors.teal : Colors.red,
+            borderRadius: BorderRadius.circular(10),
+            elevation: 6,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+              child: Text(
+                text
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+
